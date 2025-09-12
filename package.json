@@ -1,0 +1,26 @@
+{
+  "name": "newsletter-maker",
+  "version": "1.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "echo 'No linter configured'"
+  },
+  "dependencies": {
+    "@fontsource/bungee": "^5.2.6",
+    "@fontsource/poppins": "^5.2.6",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "next": "^14.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-to-print": "^2.14.15"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.10"
+  }
+}
