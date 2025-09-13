@@ -1,4 +1,6 @@
 'use client';
+import { useEffect, useRef } from 'react';
+import usePageFit from '../lib/usePageFit';  // <-- NEW
 import BannerHardcoded from './BannerHardcoded';
 import SocialsHardcoded from './SocialsHardcoded';
 import SponsorsHardcoded from './SponsorsHardcoded';
@@ -19,15 +21,33 @@ function Block({ image, title, text, className, imageClassName }) {
   );
 }
 
-export default function PrintPage({ page }) {
+export default function PrintPage({ page, onFitChange }) {
   const { layout, content } = page;
 
+  // Measure the whole A4 wrapper
+  const pageRef = useRef(null);
+  const { fits, overflowPx, usagePct } = usePageFit(pageRef);
+
+  // Report status to parent (for disabling download)
+  useEffect(() => {
+    onFitChange?.(page.id, { fits, overflowPx, usagePct });
+  }, [fits, overflowPx, usagePct, page.id, onFitChange]);
+
   return (
-    <div className="a4 page-break p-6 flex flex-col gap-6">
+    <div ref={pageRef} className="relative a4 page-break p-6 flex flex-col gap-6">
+      {/* Fit badge (screen only) */}
+      
+      <div className={`fit-badge no-print no-export ${fits ? 'fit-ok' : 'fit-warn'}`}>
+      {fits ? '✓ Fits' : `✗ Too long (+${overflowPx}px)`}
+      </div>
+
+      {/* Top Banner (hardcoded) */}
       <BannerHardcoded />
 
+      {/* Content layouts */}
       {layout === 1 && (
         <div className="grid grid-cols-[35%_5%_1fr] gap-4">
+          {/* Left */}
           <Block
             image={content.left?.image}
             title={content.left?.title}
@@ -35,23 +55,24 @@ export default function PrintPage({ page }) {
             className="space-y-2"
             imageClassName="aspect-square"
           />
+
           <div />
+
+          {/* Right: dynamic blocks, 300px images in print */}
           <div className="flex flex-col gap-6">
-            {/* right blocks keep 300px fixed height */}
-            <Block
-              image={content.rightTop?.image}
-              title={content.rightTop?.title}
-              text={content.rightTop?.text}
-              className="space-y-2"
-              imageClassName="fixed-300"
-            />
-            <Block
-              image={content.rightBottom?.image}
-              title={content.rightBottom?.title}
-              text={content.rightBottom?.text}
-              className="space-y-2"
-              imageClassName="fixed-300"
-            />
+            {(content.rightBlocks && content.rightBlocks.length
+              ? content.rightBlocks
+              : [content.rightTop, content.rightBottom].filter(Boolean)
+            ).map((rb, i) => (
+              <Block
+                key={i}
+                image={rb?.image}
+                title={rb?.title}
+                text={rb?.text}
+                className="space-y-2"
+                imageClassName="fixed-300"
+              />
+            ))}
           </div>
         </div>
       )}
@@ -65,7 +86,7 @@ export default function PrintPage({ page }) {
               title={b.title}
               text={b.text}
               className="space-y-2"
-              imageClassName="fullwidth-img"  /* CAP HERE */
+              imageClassName="fullwidth-img"
             />
           ))}
         </div>
@@ -74,31 +95,14 @@ export default function PrintPage({ page }) {
       {layout === 3 && (
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-2 gap-6">
-            <Block
-              image={content.topLeft?.image}
-              title={content.topLeft?.title}
-              text={content.topLeft?.text}
-              className="space-y-2"
-              imageClassName="fullwidth-img"  /* CAP HERE */
-            />
-            <Block
-              image={content.topRight?.image}
-              title={content.topRight?.title}
-              text={content.topRight?.text}
-              className="space-y-2"
-              imageClassName="fullwidth-img"  /* CAP HERE */
-            />
+            <Block image={content.topLeft?.image}  title={content.topLeft?.title}  text={content.topLeft?.text}  className="space-y-2" imageClassName="fullwidth-img" />
+            <Block image={content.topRight?.image} title={content.topRight?.title} text={content.topRight?.text} className="space-y-2" imageClassName="fullwidth-img" />
           </div>
-          <Block
-            image={content.bottom?.image}
-            title={content.bottom?.title}
-            text={content.bottom?.text}
-            className="space-y-2"
-            imageClassName="fullwidth-img"    /* CAP HERE */
-          />
+          <Block image={content.bottom?.image} title={content.bottom?.title} text={content.bottom?.text} className="space-y-2" imageClassName="fullwidth-img" />
         </div>
       )}
 
+      {/* Bottom (hardcoded) */}
       <SponsorsHardcoded />
       <SocialsHardcoded />
     </div>
