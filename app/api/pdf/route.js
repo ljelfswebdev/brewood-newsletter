@@ -1,19 +1,17 @@
-// app/api/pdf/route.js
 import chromium from '@sparticuz/chromium';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// optional tuning
 chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
 
 async function launchBrowser() {
   if (process.platform !== 'linux') {
-    const { default: puppeteer } = await import('puppeteer'); // dev dep for macOS/Windows
+    const { default: puppeteer } = await import('puppeteer'); // local dev only
     return puppeteer.launch({
       headless: 'new',
-      defaultViewport: { width: 1200, height: 1700, deviceScaleFactor: 2 },
+      defaultViewport: { width: 1200, height: 1700, deviceScaleFactor: 2 }
     });
   }
   const { default: puppeteer } = await import('puppeteer-core');
@@ -23,7 +21,7 @@ async function launchBrowser() {
     args: chromium.args,
     executablePath,
     headless: chromium.headless ?? true,
-    defaultViewport: { width: 1200, height: 1700, deviceScaleFactor: 2 },
+    defaultViewport: { width: 1200, height: 1700, deviceScaleFactor: 2 }
   });
 }
 
