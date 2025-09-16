@@ -38,7 +38,7 @@ export default function HomePage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">A4 Preview</h2>
-          <DownloadButtons pages={pages} />
+          <DownloadButtons printRef={printRef} disabledReason={disabledReason} />
         </div>
 
         {/* Small summary if any overflow */}

@@ -14,14 +14,11 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "next": "^14.2.5",
-    "puppeteer-core": "^24.21.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-to-print": "^2.14.15",
-    "@sparticuz/chromium": "^127.0.0"
+    "react-to-print": "^2.14.15"
   },
   "devDependencies": {
-
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.39",
     "puppeteer": "^24.21.0",

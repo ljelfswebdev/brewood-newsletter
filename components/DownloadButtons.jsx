@@ -1,47 +1,61 @@
 'use client';
 import { useRef } from 'react';
+import { exportContainerToPdf } from '../lib/exportPdf';
 
-export default function DownloadButtons({ pages }) {
+export default function DownloadButtons({ printRef, disabledReason }) {
   const busyRef = useRef(false);
 
-  const handleServerPdf = async () => {
+  const getContainer = () => {
+    // Prefer the passed ref if available
+    if (printRef?.current) return printRef.current;
+
+    // Fallbacks: try a known wrapper or nearest parent of an .a4 page
+    const byId =
+      document.getElementById('print-root') ||
+      document.querySelector('.pages-container') ||
+      document.querySelector('.newsletter-container');
+
+    if (byId) return byId;
+
+    const a4 = document.querySelector('.a4');
+    if (a4 && a4.parentElement) return a4.parentElement;
+
+    // Last resort
+    return document.body;
+  };
+
+  const handlePdf = async () => {
     if (busyRef.current) return;
     busyRef.current = true;
+
+    const container = getContainer();
+
     try {
-      const res = await fetch('/api/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pages }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'PDF generation failed');
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'newsletter.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      alert(`PDF generation failed: ${e.message}`);
-      console.error(e);
+      container?.classList.add('exporting'); // hide badges etc.
+      await exportContainerToPdf(container);
     } finally {
+      container?.classList.remove('exporting');
       busyRef.current = false;
     }
   };
 
+  const disabled = Boolean(disabledReason);
+
   return (
     <div className="flex items-center gap-3">
       <button
-        onClick={handleServerPdf}
-        className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm"
+        onClick={handlePdf}
+        disabled={disabled}
+        className={`px-4 py-2 rounded-xl text-sm ${
+          disabled
+            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+            : 'bg-gray-900 text-white'
+        }`}
+        title={disabledReason || 'Export to PDF'}
       >
         Download PDF
       </button>
+
       <button
         onClick={() => window.print()}
         className="px-4 py-2 rounded-xl bg-white border text-sm"
