@@ -30,7 +30,7 @@ img { max-width: 100%; }
 
 /* Full-width blocks: cap height to 300–400px */
 .fullwidth-img {
-  height: 150px;       /* default */
+  height: 200px;       /* default */
   max-height: 400px;   /* never exceed */
 }
 

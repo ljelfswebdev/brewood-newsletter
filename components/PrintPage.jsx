@@ -53,7 +53,7 @@ export default function PrintPage({ page, onFitChange }) {
             title={content.left?.title}
             text={content.left?.text}
             className="space-y-2"
-            imageClassName="aspect-square"
+            imageClassName="aspect-square !object-contain"
           />
 
           <div />
