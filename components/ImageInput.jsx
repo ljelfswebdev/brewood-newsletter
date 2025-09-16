@@ -15,39 +15,69 @@ export default function ImageInput({
 
   useEffect(() => { setPreview(value || null); }, [value]);
 
-  const handleFile = (file) => {
+  // Read a File into a data URL (base64) so it survives serialization to /print
+  const fileToDataURL = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);      // e.g. "data:image/png;base64,AAAA..."
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleFile = async (file) => {
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    onChange(url);
+    try {
+      // Optional: basic type guard
+      if (!file.type.startsWith('image/')) {
+        alert('Please choose an image file.');
+        return;
+      }
+
+      const dataUrl = await fileToDataURL(file);
+
+      // Update preview immediately
+      setPreview(dataUrl);
+
+      // Push value up to parent form/state
+      onChange?.(dataUrl);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to read the image.');
+    }
   };
 
-  // classes for the preview container
-  const baseBox =
+  const outerClass =
     size === 'thumb'
-      ? `relative overflow-hidden rounded-xl bg-white border cursor-pointer ${
-          square ? 'aspect-square' : ''} ${!square ? '' : ''}`
-      : 'relative border-2 border-dashed rounded-xl p-3 flex items-center justify-center bg-white hover:border-gray-400 transition cursor-pointer';
+      ? `border rounded-lg p-2 ${className || ''}`
+      : `${className || ''}`;
 
-  // inline style only for thumb height (keeps it simple)
-  const thumbStyle = size === 'thumb' && !square ? { height: `${thumbHeight}px` } : undefined;
+  const boxClass =
+    size === 'thumb'
+      ? `w-full ${square ? 'aspect-square' : ''}`
+      : 'w-full';
 
   return (
-    <div className={className}>
-      {label && <label className="block text-sm font-medium mb-1">{label}</label>}
+    <div className={outerClass}>
+      {label && <div className="text-xs text-gray-600 mb-1">{label}</div>}
 
       <div
-        className={baseBox}
-        style={thumbStyle}
+        className={`relative ${boxClass} cursor-pointer`}
+        style={size === 'thumb' && !square ? { height: thumbHeight } : undefined}
         onClick={() => inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => (e.key === 'Enter' ? inputRef.current?.click() : null)}
       >
         {preview ? (
           <img
-            src={preview}
-            alt="preview"
-            className={`w-full h-full object-cover ${size === 'thumb' ? '' : 'rounded-lg'}`}
+            src={preview}              // data: URL works in editor & in Puppeteer
+            alt=""
+            decoding="async"
+            loading="eager"
+            className={`w-full h-full object-cover rounded-md`}
           />
         ) : (
-          <div className={`flex items-center justify-center text-gray-500 text-xs ${size === 'thumb' ? 'h-full' : ''}`}>
+          <div className="w-full h-full rounded-md bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center text-gray-500 text-sm">
             Click to upload
           </div>
         )}

@@ -1,34 +1,44 @@
 'use client';
 import { useRef } from 'react';
-import { exportContainerToPdf } from '../lib/exportPdf';
 
-export default function DownloadButtons({ printRef, disabledReason }) {
+export default function DownloadButtons({ pages }) {
   const busyRef = useRef(false);
 
-  const handlePdf = async () => {
+  const handleServerPdf = async () => {
     if (busyRef.current) return;
     busyRef.current = true;
-    const container = printRef.current;
     try {
-      if (container) container.classList.add('exporting');   // hide badges
-      await exportContainerToPdf(container);
+      const res = await fetch('/api/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pages }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'PDF generation failed');
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'newsletter.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(`PDF generation failed: ${e.message}`);
+      console.error(e);
     } finally {
-      if (container) container.classList.remove('exporting'); // show badges again
       busyRef.current = false;
     }
   };
 
-  const disabled = !!disabledReason;
-
   return (
     <div className="flex items-center gap-3">
       <button
-        onClick={handlePdf}
-        disabled={disabled}
-        className={`px-4 py-2 rounded-xl text-sm ${
-          disabled ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gray-900 text-white'
-        }`}
-        title={disabledReason || 'Export to PDF'}
+        onClick={handleServerPdf}
+        className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm"
       >
         Download PDF
       </button>

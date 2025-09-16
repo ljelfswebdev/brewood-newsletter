@@ -46,7 +46,7 @@ export default function PrintPage({ page, onFitChange }) {
 
       {/* Content layouts */}
       {layout === 1 && (
-        <div className="grid grid-cols-[35%_5%_1fr] gap-4">
+        <div className="grid grid-cols-[35%_1fr] gap-12">
           {/* Left */}
           <Block
             image={content.left?.image}
@@ -56,7 +56,7 @@ export default function PrintPage({ page, onFitChange }) {
             imageClassName="aspect-square !object-contain"
           />
 
-          <div />
+       
 
           {/* Right: dynamic blocks, 300px images in print */}
           <div className="flex flex-col gap-6">
@@ -94,9 +94,10 @@ export default function PrintPage({ page, onFitChange }) {
 
       {layout === 3 && (
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-6">
-            <Block image={content.topLeft?.image}  title={content.topLeft?.title}  text={content.topLeft?.text}  className="space-y-2" imageClassName="fullwidth-img" />
-            <Block image={content.topRight?.image} title={content.topRight?.title} text={content.topRight?.text} className="space-y-2" imageClassName="fullwidth-img" />
+          <div className="grid grid-cols-2 gap-12">
+            <Block image={content.topLeft?.image}  title={content.topLeft?.title}  text={content.topLeft?.text}  className="space-y-2" imageClassName="!object-contain aspect-square" />
+       
+            <Block image={content.topRight?.image} title={content.topRight?.title} text={content.topRight?.text} className="space-y-2" imageClassName="!object-contain aspect-square" />
           </div>
           <Block image={content.bottom?.image} title={content.bottom?.title} text={content.bottom?.text} className="space-y-2" imageClassName="fullwidth-img" />
         </div>
