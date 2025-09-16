@@ -3,10 +3,7 @@
       "api/pdf/route.js": {
         "memory": 1536,
         "maxDuration": 60,
-        "includeFiles": [
-          "node_modules/@sparticuz/chromium/**",
-          "node_modules/puppeteer-core/**"
-        ]
+        "includeFiles": "node_modules/@sparticuz/chromium/**"
       }
     }
   }
